@@ -120,6 +120,8 @@ async def process_callback_cancel(callback_query: types.CallbackQuery):
     else: 
         await callback_query.message.edit_text(text=callback_query.message.text + " - обработано ❌")
 
+    await bot.send_message(chat_id=user_id, text=messages.cancel_message)
+
 @dp.callback_query_handler(lambda c: c.data == 'card')
 async def handle_back(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
@@ -127,6 +129,7 @@ async def handle_back(callback_query: types.CallbackQuery):
     await callback_query.message.edit_text(
         text=callback_query.message.text + " \nОплачено ✅", 
     )           
+
 
 @dp.message_handler(state=TestStates.GET_NUMBER)
 async def send_screenshot(message: types.Message):
