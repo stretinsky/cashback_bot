@@ -1,4 +1,3 @@
-
 from typing import Dict
 from aiogram.types import ReplyKeyboardRemove, \
     ReplyKeyboardMarkup, KeyboardButton, \
@@ -19,3 +18,7 @@ def get_apply_kb(user_id, username):
     cancel = InlineKeyboardButton('❌', callback_data=f"cancel_{user_id}")
     user = InlineKeyboardButton(f"@{username}", url=f"t.me/{username}")
     return InlineKeyboardMarkup(row_width=2).add(ok, cancel, user)
+
+def get_card_kb():
+    card = InlineKeyboardButton('💳', callback_data=f"card")
+    return InlineKeyboardMarkup(row_width=1).add(card)

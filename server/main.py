@@ -1,3 +1,4 @@
+from gettext import textdomain
 import logging
 import importlib
 import keyboard
@@ -93,7 +94,6 @@ async def handle_three(callback_query: types.CallbackQuery):
 
 @dp.message_handler(state=TestStates.GET_SCREENSHOT, content_types=['photo', 'text'])
 async def send_screenshot(pic: types.Message):
-    print(123)
     await bot.copy_message(from_chat_id=pic.chat.id, chat_id=get_from_dotenv('READY_FOR_PAY_CHAT_ID'), message_id=pic.message_id, reply_markup=keyboard.get_apply_kb(pic.from_user.id, pic.from_user.username))
     await pic.answer(text='Ваше обращение будет рассмотрено в ближайшее время')
 
@@ -107,8 +107,8 @@ async def process_callback_ok(callback_query: types.CallbackQuery):
     else: 
         await callback_query.message.edit_text(text=callback_query.message.text + " - обработано ✅")
 
-    
     await bot.send_message(chat_id=user_id, text=messages.ok_message)
+    state = await storage.set_state(user=user_id, state=TestStates.GET_NUMBER)
 
 @dp.callback_query_handler(filters.Regexp(r"cancel_.*"))
 async def process_callback_cancel(callback_query: types.CallbackQuery):
@@ -119,6 +119,23 @@ async def process_callback_cancel(callback_query: types.CallbackQuery):
         await callback_query.message.edit_caption(caption="обработано ❌")
     else: 
         await callback_query.message.edit_text(text=callback_query.message.text + " - обработано ❌")
+
+@dp.callback_query_handler(lambda c: c.data == 'card')
+async def handle_back(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+
+    await callback_query.message.edit_text(
+        text=callback_query.message.text + " \nОплачено ✅", 
+    )           
+
+@dp.message_handler(state=TestStates.GET_NUMBER)
+async def send_screenshot(message: types.Message):
+    text = f"Оплатить: @{message.from_user.username}\n"
+    text += f"Сообщение: {message.text}"
+    await bot.send_message(chat_id=get_from_dotenv('READY_FOR_PAY_CHAT_ID'), text=text, reply_markup=keyboard.get_card_kb())
+    await message.answer(text="Ожидайте поступления")
+    state = dp.current_state(user=message.from_user.id)
+    await state.reset_state()
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

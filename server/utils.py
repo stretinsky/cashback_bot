@@ -5,3 +5,4 @@ class TestStates(Helper):
 
     GET_REQUEST = Item()
     GET_SCREENSHOT = Item()
+    GET_NUMBER = Item()
